@@ -19,4 +19,8 @@ jobs:
 
     - name: Install dependencies
       run: composer install
+    - name: check code with PHPstan
+      run: vendor/bin/phpstan analyse src --level 5
+    - name: unit test
+      run: bin/phpunit
 
