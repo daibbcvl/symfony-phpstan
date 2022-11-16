@@ -36,7 +36,7 @@ services:
            - '%memcached_session_prefix%'
         calls:
 #            - [setSaslAuthData, [%memcached_user%,%memcached_password%]]
-            - [addServer, [%memcached_host%,%memcached_port%]]
+            - [addServer, ['%memcached_host%','%memcached_port%']]
     #memcached.default_binary_protocol = On
 #    session.handler.memcached:
 #        class: Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler
@@ -47,5 +47,5 @@ services:
 
     session.handler.memcached:
         class: Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler
-        arguments: [ "@session.memcached", { prefix: '%memcached_session_prefix%', expiretime: '%memcached_expire%' } ]
+        arguments: [ '@session.memcached', { prefix: '%memcached_session_prefix%', expiretime: '%memcached_expire%' } ]
 
