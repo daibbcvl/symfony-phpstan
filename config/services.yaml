@@ -4,6 +4,13 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    secret: '%env(APP_SECRET)%'
+    memcached_host: '%env(MEMCACHED_HOST)%'
+    memcached_user: '%env(MEMCACHED_USER)%'
+    memcached_password: '%env(MEMCACHED_PASSWORD)%'
+    memcached_port: '%env(MEMCACHED_PORT)%'
+    memcached_session_prefix: session
+    memcached_expire: 3600
 
 services:
     # default configuration for services in *this* file
@@ -22,3 +29,18 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    session.memcached:
+        class: App\Session\Memcached
+        arguments:
+           - persistent_id: "%memcached_session_prefix%"
+        calls:
+            - [setSaslAuthData, ["%memcached_user%","%memcached_password%"]]
+            - [addServer, ["%memcached_host%","%memcached_port%"]]
+
+    session.handler.memcached:
+        class: Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler
+        arguments:
+            - '@session.memcached'
+            - [prefix: "%memcached_session_prefix%", expiretime: "%memcached_expire%"]
+
