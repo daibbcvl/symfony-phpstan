@@ -33,14 +33,19 @@ services:
     session.memcached:
         class: App\Session\Memcached
         arguments:
-           - persistent_id: '%memcached_session_prefix%'
+           - '%memcached_session_prefix%'
         calls:
-            - [setSaslAuthData, ['%memcached_user%','%memcached_password%']]
-            - [addServer, ['%memcached_host%','%memcached_port%']]
+#            - [setSaslAuthData, [%memcached_user%,%memcached_password%]]
+            - [addServer, [%memcached_host%,%memcached_port%]]
+    #memcached.default_binary_protocol = On
+#    session.handler.memcached:
+#        class: Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler
+#        arguments:
+#            - '@session.memcached'
+#            - [prefix: '%memcached_session_prefix%', expiretime: '%memcached_expire%']
+    #https://www.youtube.com/watch?v=BLD3J25DYEc&list=PLlahAO-uyDzJ7sWdvD_j0eyvbKtf-1quq
 
     session.handler.memcached:
         class: Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler
-        arguments:
-            - '@session.memcached'
-            - [prefix: '%memcached_session_prefix%', expiretime: '%memcached_expire%']
+        arguments: [ "@session.memcached", { prefix: '%memcached_session_prefix%', expiretime: '%memcached_expire%' } ]
 
