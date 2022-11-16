@@ -50,7 +50,8 @@ class TestController extends AbstractController
         #brew install php81-memcached --with-zlib-dir=/usr/local/Cellar/zlib/1.2.13/include/zlib.h
 
         return $this->json([
-            'message' => "Count: {$count}"
+            'message' => "Count: {$count}",
+            'IP address' => $_SERVER['REMOTE_ADDR']
         ]);
 
     }
