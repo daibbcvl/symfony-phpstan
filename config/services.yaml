@@ -9,7 +9,7 @@ parameters:
     memcached_user: '%env(MEMCACHED_USER)%'
     memcached_password: '%env(MEMCACHED_PASSWORD)%'
     memcached_port: '%env(MEMCACHED_PORT)%'
-    memcached_session_prefix: 'session'
+    memcached_session_prefix: 'sess_'
     memcached_expire: 3600
 
 services:
