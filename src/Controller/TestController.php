@@ -32,6 +32,18 @@ class TestController extends AbstractController
     #[Route('/api/set_session', methods: ['GET'])]
     public function setSession(RequestStack $requestStack): JsonResponse
     {
+
+        $mem_var = new \Memcached();
+        $mem_var->addServer("127.0.0.1", 11211);
+        $response = $mem_var->get("Bilbo");
+        if ($response) {
+           echo $response;
+        } else {
+
+            $mem_var->set("Bilbo", "Here s Your (Ring) Master stored in MemCached (^_^)") or die(" Keys Couldn't be Created : Bilbo Not Found :'( ");
+        }
+
+
         $session = $requestStack->getSession();
         $count =  $session->get('count');
        if(!$count) {
@@ -39,7 +51,7 @@ class TestController extends AbstractController
            // stores an attribute in the session for later reuse
 
 
-           $count = 999;
+           $count = rand(100,999);
            $session->set('count', $count);
            return $this->json([
                'message' => "Session did not set"

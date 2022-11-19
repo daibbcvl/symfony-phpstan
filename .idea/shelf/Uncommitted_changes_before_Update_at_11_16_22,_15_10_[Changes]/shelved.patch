@@ -1,0 +1,315 @@
+Index: docker-compose.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/docker-compose.yml b/docker-compose.yml
+new file mode 100644
+--- /dev/null	(date 1668581877602)
++++ b/docker-compose.yml	(date 1668581877602)
+@@ -0,0 +1,18 @@
++version: "3.1"
++services:
++  webserver:
++    image: nginx:alpine
++    container_name: persistence-webserver
++    working_dir: /application
++    volumes:
++      - .:/application
++      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
++    ports:
++      - "8000:80"
++
++  php-fpm:
++    build: docker/php-fpm
++    container_name: persistence-php
++    working_dir: /application
++    volumes:
++      - .:/application
+Index: docker/nginx/default.conf
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/docker/nginx/default.conf b/docker/nginx/default.conf
+new file mode 100644
+--- /dev/null	(date 1668584398066)
++++ b/docker/nginx/default.conf	(date 1668584398066)
+@@ -0,0 +1,26 @@
++server {
++    listen 80 default;
++
++    client_max_body_size 108M;
++
++    access_log /var/log/nginx/application.access.log;
++
++
++    root /application/public;
++    index index.php;
++
++    if (!-e $request_filename) {
++        rewrite ^.*$ /index.php last;
++    }
++
++    location ~ \.php$ {
++        fastcgi_pass php-fpm:9000;
++        fastcgi_index index.php;
++        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
++        fastcgi_param PHP_VALUE "error_log=/var/log/nginx/application_php_errors.log";
++        fastcgi_buffers 16 16k;
++        fastcgi_buffer_size 32k;
++        include fastcgi_params;
++    }
++
++}
+\ No newline at end of file
+Index: docker/php-fpm/Dockerfile
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/docker/php-fpm/Dockerfile b/docker/php-fpm/Dockerfile
+new file mode 100644
+--- /dev/null	(date 1668584301974)
++++ b/docker/php-fpm/Dockerfile	(date 1668584301974)
+@@ -0,0 +1,24 @@
++FROM nfqlt/php81-fpm
++WORKDIR "/application"
++
++# Fix debconf warnings upon build
++ARG DEBIAN_FRONTEND=noninteractive
++
++# Install selected extensions and other stuff
++RUN apt-get update \
++    && apt-get -y --no-install-recommends install  php8.1-zip  php8.1-intl php8.1-bcmath php8.1-sockets php8.1-phar php8.1-mysql php8.1-ldap php8.1-soap \
++    && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
++
++
++# Install git
++RUN apt-get update \
++    && apt-get -y install git \
++    && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
++
++
++#COPY composer.sh ./
++#RUN chmod +x composer.sh
++#RUN ./composer.sh
++
++
++
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"ChangeListManager\">\n    <list default=\"true\" id=\"f4ce024d-89c9-4a29-9fb5-a39329093109\" name=\"Changes\" comment=\"Initial symfony project\">\n      <change afterPath=\"$PROJECT_DIR$/src/Utility/Formular.php\" afterDir=\"false\" />\n      <change afterPath=\"$PROJECT_DIR$/tests/Utility/FormularTest.php\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/.github/workflows/php.yml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.github/workflows/php.yml\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/.gitignore\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.gitignore\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/composer.json\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/composer.json\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/composer.lock\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/composer.lock\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/config/bundles.php\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/config/bundles.php\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/symfony.lock\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/symfony.lock\" afterDir=\"false\" />\n    </list>\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\n  </component>\n  <component name=\"ComposerSettings\">\n    <execution />\n  </component>\n  <component name=\"Git.Settings\">\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\n  </component>\n  <component name=\"MarkdownSettingsMigration\">\n    <option name=\"stateVersion\" value=\"1\" />\n  </component>\n  <component name=\"ProjectId\" id=\"2HLdDPHsDjVnwPeg6OqfVKC87QM\" />\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\n  <component name=\"ProjectViewState\">\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\n    <option name=\"showLibraryContents\" value=\"true\" />\n  </component>\n  <component name=\"PropertiesComponent\"><![CDATA[{\n  \"keyToString\": {\n    \"ASKED_ADD_EXTERNAL_FILES\": \"true\",\n    \"ASKED_SHARE_PROJECT_CONFIGURATION_FILES\": \"true\",\n    \"RunOnceActivity.OpenProjectViewOnStart\": \"true\",\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\n    \"WebServerToolWindowFactoryState\": \"false\",\n    \"last_opened_file_path\": \"/Users/macintoshhd/phung/symfony-phpstan/tests\",\n    \"vue.rearranger.settings.migration\": \"true\"\n  }\n}]]></component>\n  <component name=\"RecentsManager\">\n    <key name=\"CopyFile.RECENT_KEYS\">\n      <recent name=\"$PROJECT_DIR$/tests\" />\n    </key>\n  </component>\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\n  <component name=\"TaskManager\">\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\n      <changelist id=\"f4ce024d-89c9-4a29-9fb5-a39329093109\" name=\"Changes\" comment=\"\" />\n      <created>1668068178648</created>\n      <option name=\"number\" value=\"Default\" />\n      <option name=\"presentableId\" value=\"Default\" />\n      <updated>1668068178648</updated>\n      <workItem from=\"1668068182929\" duration=\"2591000\" />\n    </task>\n    <task id=\"LOCAL-00001\" summary=\"Initial symfony project\">\n      <created>1668069781933</created>\n      <option name=\"number\" value=\"00001\" />\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1668069781933</updated>\n    </task>\n    <option name=\"localTasksCounter\" value=\"2\" />\n    <servers />\n  </component>\n  <component name=\"TypeScriptGeneratedFilesManager\">\n    <option name=\"version\" value=\"3\" />\n  </component>\n  <component name=\"Vcs.Log.Tabs.Properties\">\n    <option name=\"TAB_STATES\">\n      <map>\n        <entry key=\"MAIN\">\n          <value>\n            <State />\n          </value>\n        </entry>\n      </map>\n    </option>\n  </component>\n  <component name=\"VcsManagerConfiguration\">\n    <MESSAGE value=\"Initial symfony project\" />\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Initial symfony project\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 2110f7ac8bdba6f2932f38cf7fed9b4c0cd9edcd)
++++ b/.idea/workspace.xml	(date 1668586087457)
+@@ -1,23 +1,21 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ChangeListManager">
+-    <list default="true" id="f4ce024d-89c9-4a29-9fb5-a39329093109" name="Changes" comment="Initial symfony project">
+-      <change afterPath="$PROJECT_DIR$/src/Utility/Formular.php" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/tests/Utility/FormularTest.php" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/.github/workflows/php.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/php.yml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
++    <list default="true" id="f4ce024d-89c9-4a29-9fb5-a39329093109" name="Changes" comment="Add memcached session">
++      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/docker/nginx/default.conf" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/docker/php-fpm/Dockerfile" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/docker/php-fpm/composer.sh" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" afterPath="$PROJECT_DIR$/composer.lock" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/config/bundles.php" beforeDir="false" afterPath="$PROJECT_DIR$/config/bundles.php" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/symfony.lock" beforeDir="false" afterPath="$PROJECT_DIR$/symfony.lock" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/config/packages/framework.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/packages/framework.yaml" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+     <option name="LAST_RESOLUTION" value="IGNORE" />
+   </component>
+-  <component name="ComposerSettings">
++  <component name="ComposerSettings" synchronizationState="SYNCHRONIZE">
++    <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
+     <execution />
+   </component>
+   <component name="Git.Settings">
+@@ -25,6 +23,77 @@
+   </component>
+   <component name="MarkdownSettingsMigration">
+     <option name="stateVersion" value="1" />
++  </component>
++  <component name="PhpWorkspaceProjectConfiguration">
++    <include_path>
++      <path value="$PROJECT_DIR$/vendor/doctrine/inflector" />
++      <path value="$PROJECT_DIR$/vendor/theseer/tokenizer" />
++      <path value="$PROJECT_DIR$/vendor/doctrine/instantiator" />
++      <path value="$PROJECT_DIR$/vendor/phar-io/version" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/resource-operations" />
++      <path value="$PROJECT_DIR$/vendor/phar-io/manifest" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/exporter" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/environment" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/code-unit" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/cli-parser" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/version" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/type" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/lines-of-code" />
++      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-grapheme" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/recursion-context" />
++      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-mbstring" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/diff" />
++      <path value="$PROJECT_DIR$/vendor/symfony/console" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/code-unit-reverse-lookup" />
++      <path value="$PROJECT_DIR$/vendor/symfony/dependency-injection" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/complexity" />
++      <path value="$PROJECT_DIR$/vendor/symfony/cache-contracts" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/object-reflector" />
++      <path value="$PROJECT_DIR$/vendor/symfony/error-handler" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/object-enumerator" />
++      <path value="$PROJECT_DIR$/vendor/symfony/flex" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/global-state" />
++      <path value="$PROJECT_DIR$/vendor/symfony/var-exporter" />
++      <path value="$PROJECT_DIR$/vendor/sebastian/comparator" />
++      <path value="$PROJECT_DIR$/vendor/symfony/http-foundation" />
++      <path value="$PROJECT_DIR$/vendor/symfony/service-contracts" />
++      <path value="$PROJECT_DIR$/vendor/symfony/routing" />
++      <path value="$PROJECT_DIR$/vendor/symfony/deprecation-contracts" />
++      <path value="$PROJECT_DIR$/vendor/phpunit/php-file-iterator" />
++      <path value="$PROJECT_DIR$/vendor/symfony/string" />
++      <path value="$PROJECT_DIR$/vendor/phpunit/php-invoker" />
++      <path value="$PROJECT_DIR$/vendor/symfony/yaml" />
++      <path value="$PROJECT_DIR$/vendor/phpunit/php-code-coverage" />
++      <path value="$PROJECT_DIR$/vendor/symfony/http-kernel" />
++      <path value="$PROJECT_DIR$/vendor/phpstan/phpstan" />
++      <path value="$PROJECT_DIR$/vendor/phpunit/php-text-template" />
++      <path value="$PROJECT_DIR$/vendor/symfony/finder" />
++      <path value="$PROJECT_DIR$/vendor/phpunit/phpunit" />
++      <path value="$PROJECT_DIR$/vendor/symfony/event-dispatcher-contracts" />
++      <path value="$PROJECT_DIR$/vendor/phpunit/php-timer" />
++      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-normalizer" />
++      <path value="$PROJECT_DIR$/vendor/symfony/filesystem" />
++      <path value="$PROJECT_DIR$/vendor/symfony/var-dumper" />
++      <path value="$PROJECT_DIR$/vendor/symfony/runtime" />
++      <path value="$PROJECT_DIR$/vendor/symfony/event-dispatcher" />
++      <path value="$PROJECT_DIR$/vendor/symfony/config" />
++      <path value="$PROJECT_DIR$/vendor/symfony/cache" />
++      <path value="$PROJECT_DIR$/vendor/symfony/dotenv" />
++      <path value="$PROJECT_DIR$/vendor/symfony/framework-bundle" />
++      <path value="$PROJECT_DIR$/vendor/psr/log" />
++      <path value="$PROJECT_DIR$/vendor/psr/container" />
++      <path value="$PROJECT_DIR$/vendor/psr/event-dispatcher" />
++      <path value="$PROJECT_DIR$/vendor/masterminds/html5" />
++      <path value="$PROJECT_DIR$/vendor/psr/cache" />
++      <path value="$PROJECT_DIR$/vendor/myclabs/deep-copy" />
++      <path value="$PROJECT_DIR$/vendor/composer" />
++      <path value="$PROJECT_DIR$/vendor/nikic/php-parser" />
++      <path value="$PROJECT_DIR$/vendor/symfony/maker-bundle" />
++      <path value="$PROJECT_DIR$/vendor/symfony/phpunit-bridge" />
++      <path value="$PROJECT_DIR$/vendor/symfony/css-selector" />
++      <path value="$PROJECT_DIR$/vendor/symfony/dom-crawler" />
++      <path value="$PROJECT_DIR$/vendor/symfony/browser-kit" />
++    </include_path>
+   </component>
+   <component name="ProjectId" id="2HLdDPHsDjVnwPeg6OqfVKC87QM" />
+   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+@@ -39,15 +108,23 @@
+     "RunOnceActivity.OpenProjectViewOnStart": "true",
+     "RunOnceActivity.ShowReadmeOnStart": "true",
+     "WebServerToolWindowFactoryState": "false",
+-    "last_opened_file_path": "/Users/macintoshhd/phung/symfony-phpstan/tests",
++    "full.screen.before.presentation.mode": "false",
++    "last_opened_file_path": "/Users/macintoshhd/phung/symfony-phpstan",
+     "vue.rearranger.settings.migration": "true"
+   }
+ }]]></component>
+   <component name="RecentsManager">
+     <key name="CopyFile.RECENT_KEYS">
++      <recent name="$PROJECT_DIR$" />
+       <recent name="$PROJECT_DIR$/tests" />
+     </key>
+   </component>
++  <component name="RunManager">
++    <configuration name="phpunit.xml.dist" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
++      <TestRunner scope="XML" />
++      <method v="2" />
++    </configuration>
++  </component>
+   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+   <component name="TaskManager">
+     <task active="true" id="Default" summary="Default task">
+@@ -56,7 +133,8 @@
+       <option name="number" value="Default" />
+       <option name="presentableId" value="Default" />
+       <updated>1668068178648</updated>
+-      <workItem from="1668068182929" duration="2591000" />
++      <workItem from="1668068182929" duration="2699000" />
++      <workItem from="1668562254175" duration="9220000" />
+     </task>
+     <task id="LOCAL-00001" summary="Initial symfony project">
+       <created>1668069781933</created>
+@@ -65,7 +143,21 @@
+       <option name="project" value="LOCAL" />
+       <updated>1668069781933</updated>
+     </task>
+-    <option name="localTasksCounter" value="2" />
++    <task id="LOCAL-00002" summary="Phpstan. unit test, update workflow">
++      <created>1668072389218</created>
++      <option name="number" value="00002" />
++      <option name="presentableId" value="LOCAL-00002" />
++      <option name="project" value="LOCAL" />
++      <updated>1668072389218</updated>
++    </task>
++    <task id="LOCAL-00003" summary="Add memcached session">
++      <created>1668585641472</created>
++      <option name="number" value="00003" />
++      <option name="presentableId" value="LOCAL-00003" />
++      <option name="project" value="LOCAL" />
++      <updated>1668585641472</updated>
++    </task>
++    <option name="localTasksCounter" value="4" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -84,6 +176,8 @@
+   </component>
+   <component name="VcsManagerConfiguration">
+     <MESSAGE value="Initial symfony project" />
+-    <option name="LAST_COMMIT_MESSAGE" value="Initial symfony project" />
++    <MESSAGE value="Phpstan. unit test, update workflow" />
++    <MESSAGE value="Add memcached session" />
++    <option name="LAST_COMMIT_MESSAGE" value="Add memcached session" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: docker/php-fpm/composer.sh
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/docker/php-fpm/composer.sh b/docker/php-fpm/composer.sh
+new file mode 100644
+--- /dev/null	(date 1668584301983)
++++ b/docker/php-fpm/composer.sh	(date 1668584301983)
+@@ -0,0 +1,16 @@
++#!/bin/sh
++EXPECTED_SIGNATURE=$(wget -q -O - https://composer.github.io/installer.sig)
++php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
++ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');")
++
++if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]
++then
++    >&2 echo 'ERROR: Invalid installer signature'
++    rm composer-setup.php
++    exit 1
++fi
++
++php composer-setup.php --quiet
++RESULT=$?
++rm composer-setup.php
++exit $RESULT
+\ No newline at end of file
