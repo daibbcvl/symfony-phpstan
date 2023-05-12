@@ -11,6 +11,7 @@ parameters:
     memcached_port: '%env(MEMCACHED_PORT)%'
     memcached_session_prefix: 'sess_'
     memcached_expire: 3600
+    upload_path: '%kernel.project_dir%/var/storage/default'
 
 services:
     # default configuration for services in *this* file
@@ -55,5 +56,5 @@ services:
             - version: '2006-03-01'
               region: 'ap-southeast-1'
               credentials:
-                  key: 'AKIAQSEHME7P2XTYBUPM'
-                  secret: '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'
+                  key: '%env(S3_KEY)%'
+                  secret: '%env(S3_SECRET)%'
