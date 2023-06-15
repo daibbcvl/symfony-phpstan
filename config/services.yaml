@@ -11,6 +11,7 @@ parameters:
     memcached_port: '%env(MEMCACHED_PORT)%'
     memcached_session_prefix: 'sess_'
     memcached_expire: 3600
+    upload_path: '%kernel.project_dir%/var/storage/default'
 
 services:
     # default configuration for services in *this* file
@@ -49,3 +50,11 @@ services:
         class: Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler
         arguments: [ '@session.memcached', { prefix: '%memcached_session_prefix%', expiretime: '%memcached_expire%' } ]
 
+
+    Aws\S3\S3Client:
+        arguments:
+            - version: '2006-03-01'
+              region: 'ap-southeast-1'
+              credentials:
+                  key: '%env(S3_KEY)%'
+                  secret: '%env(S3_SECRET)%'

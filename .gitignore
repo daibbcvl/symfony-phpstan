@@ -19,6 +19,10 @@
 .phpunit.result.cache
 ###< phpunit/phpunit ###
 
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###
+
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
