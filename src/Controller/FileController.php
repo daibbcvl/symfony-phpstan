@@ -7,22 +7,23 @@ use Aws\S3\S3Client;
 use finfo;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\FilesystemException;
 use League\Flysystem\FilesystemOperator;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use function League\Flysystem\AwsS3V3\upload;
-use function League\Flysystem\AwsS3V3\write;
+
 
 class FileController extends AbstractController
 {
-    private  $storage;
+    private $storage;
 
     // The variable name $defaultStorage matters: it needs to be the camelized version
     // of the name of your storage.
@@ -55,15 +56,15 @@ class FileController extends AbstractController
             }
 
 
-            return $this->json($files);
+            return new JsonResponse($files);
 
         } catch (FilesystemException $exception) {
-            // handle the error
+            return new JsonResponse($exception->getMessage());
         }
     }
 
     #[Route('/files', name: 'file_new',methods: ['POST'])]
-    public function upload(FilesystemOperator $s3Storage, CacheManager $imagineCacheManager,  Request $request): JsonResponse
+    public function upload(FilesystemOperator $s3Storage, CacheManager $imagineCacheManager, Request $request): JsonResponse
     {
         $dir = $this->getParameter('upload_path');
         //dd($dir);
@@ -73,23 +74,27 @@ class FileController extends AbstractController
         //dd($uploadedFile->hgey);
         //$s3Storage->write('/photos/' . $uploadedFile->getClientOriginalName(), file_get_contents($uploadedFile->getPathname()));
 
-      //  $adapter = $defaultStorage->
+        //  $adapter = $defaultStorage->
         //$filesystem = new \League\Flysystem\Filesystem($adapter);
-       // dd($defaultStorage);
+        // dd($defaultStorage);
         $name = $uploadedFile->getClientOriginalName();
-        $this->storage->write('/photos/' . $name, file_get_contents($uploadedFile->getPathname()));
+        $this->storage->write($name, file_get_contents($uploadedFile->getPathname()));
 
 
         //$this->storage->d
-        $name = $dir.'/photos/'.$name;
-      //  dd($name);
-      //  $resolvedPath = $imagineCacheManager->getBrowserPath($name, 'squared_thumbnail_small');
+        $name = $dir . '/photos/' . $name;
+        //  dd($name);
+        //  $resolvedPath = $imagineCacheManager->getBrowserPath($name, 'squared_thumbnail_small');
 
-      //  $s3Storage->write('/photos/' . $uploadedFile->getClientOriginalName(), file_get_contents($resolvedPath));
+        //  $s3Storage->write('/photos/' . $uploadedFile->getClientOriginalName(), file_get_contents($resolvedPath));
 
+
+        //dd($name);
+        $resolvedPath = $imagineCacheManager->getBrowserPath($uploadedFile->getClientOriginalName(), 'squared_thumbnail_small');
 
 
 //        dd($resolvedPath);
+        //bin/console liip:imagine:cache:resolve /media/dua_hau_giong_my.jpg
 
         /** @var FilterService */
         $imagine = $this
@@ -98,7 +103,6 @@ class FileController extends AbstractController
 
         // 1) Simple filter, OR
         $resourcePath = $imagine->getUrlOfFilteredImage($name, 'squared_thumbnail_small');
-        dd($resourcePath);
 
         // 2) Runtime configuration
         $runtimeConfig = [
@@ -131,14 +135,27 @@ class FileController extends AbstractController
     }
 
     #[Route('/files/download/{path}', name: 'file_download',methods: ['GET'])]
-    public function download(FilesystemOperator $s3Storage, Request $request, string $path): JsonResponse
+    public function download(FilesystemOperator $s3Storage, Request $request, string $path): Response
     {
 
 
         $content = $s3Storage->read('/photos/' . $path);
 
+        $tempFilePath = sys_get_temp_dir() . '/' . $path;
+        file_put_contents($tempFilePath, $content);
 
-        $im = imagecreatefromstring($content);
+        // Tạo một BinaryFileResponse để trả về hình ảnh
+        $response = new BinaryFileResponse($tempFilePath);
+
+
+        // Tạo một BinaryFileResponse để trả về hình ảnh
+
+        // Thiết lập các headers để xử lý tải xuống
+        $response->headers->set('Content-Type', 'image/jpeg');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $tempFilePath . '"');
+
+        return $response;
+
         if ($im !== false) {
             header('Content-Type: image/png');
             imagepng($im);
@@ -163,6 +180,4 @@ class FileController extends AbstractController
         return new RedirectResponse((string)$request->getUri());
 
     }
-
-
 }

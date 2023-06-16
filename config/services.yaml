@@ -12,6 +12,12 @@ parameters:
     memcached_session_prefix: 'sess_'
     memcached_expire: 3600
     upload_path: '%kernel.project_dir%/var/storage/default'
+    path_prefix: '%kernel.project_dir%/var/storage/cache'
+
+    s3_key: '%env(S3_KEY)%'
+    s3_secret: '%env(S3_SECRET)%'
+    env(MONGODB_URL): ''
+    env(MONGODB_DB): ''
 
 services:
     # default configuration for services in *this* file
@@ -56,5 +62,5 @@ services:
             - version: '2006-03-01'
               region: 'ap-southeast-1'
               credentials:
-                  key: '%env(S3_KEY)%'
-                  secret: '%env(S3_SECRET)%'
+                  key: '%s3_key%'
+                  secret: '%s3_secret%'

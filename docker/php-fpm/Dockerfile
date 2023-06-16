@@ -13,6 +13,8 @@ RUN apt-get update \
 
 RUN pecl install -f libsodium
 RUN echo "extension = sodium" > /usr/local/etc/php/conf.d/sodium.ini
+RUN pecl install mongodb
+RUN echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongo.ini
 
 # Add xdebug
 RUN pecl install xdebug-3.1.5

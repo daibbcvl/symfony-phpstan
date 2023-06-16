@@ -7,6 +7,7 @@
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "doctrine/mongodb-odm-bundle": "^4.5",
         "league/flysystem-aws-s3-v3": "^3.15",
         "league/flysystem-bundle": "^3.1",
         "liip/imagine-bundle": "^2.10",
@@ -76,7 +77,7 @@
     },
     "extra": {
         "symfony": {
-            "allow-contrib": true,
+            "allow-contrib": "true",
             "require": "6.1.*"
         }
     }

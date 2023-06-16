@@ -1,8 +1,16 @@
 liip_imagine:
+#  resolvers:
+#    default:
+#      web_path: ~
   #    # valid drivers options include "gd" or "gmagick" or "imagick"
   #    driver: "gd"
   #
   #    # define your filter sets under this option
+
+  loaders:
+    default:
+      filesystem:
+        data_root: '%upload_path%'
   filter_sets:
     #
     #        # an example thumbnail transformation definition
