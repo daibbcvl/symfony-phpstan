@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Utility\Formular;
+use Kreait\Firebase\Contract\Messaging;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\MessageTarget;
+use Kreait\Firebase\Messaging\Notification;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TestController extends AbstractController
@@ -66,6 +69,24 @@ class TestController extends AbstractController
             'IP address' => $_SERVER['REMOTE_ADDR']
         ]);
 
+    }
+
+    #[Route('/noti', name: 'app_test')]
+    public function noti(Messaging $messaging): JsonResponse
+    {
+        $registrationToken ="eCRJ_F6izL0O-NLz6stZeQ:APA91bEkaNpWMqfXyOvbE7kYQAGmOhAfKh8pHPWUuQslni2nsBsudcWpgyadQl0KAc81SYHwHBV5opPvjOJCYubeRz5F0IDNw4OR5PXb4WWBZ7T21jnfX-JTe6uLKVJG3mra5LW3YeAm";
+        $notification = Notification::create("The title", "This is the test notification", null);
+        $message = CloudMessage::withTarget(MessageTarget::TOKEN, $registrationToken)->withNotification($notification);
+
+        try {
+           $sentMessage  = $messaging->send($message);
+        } catch (\Exception $exception) {
+            dd($exception);
+        }
+
+        return $this->json([
+            'message' => $sentMessage['name']
+        ]);
     }
 
 }

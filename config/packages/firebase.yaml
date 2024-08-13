@@ -1,0 +1,6 @@
+# app/config/config.yml (Symfony without Flex)
+# config/packages/firebase.yaml (Symfony with Flex)
+kreait_firebase:
+    projects:
+        main:
+            credentials: '%kernel.project_dir%/config/firebase/%env(FIREBASE_CONFIG)%'

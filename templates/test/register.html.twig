@@ -1,0 +1,73 @@
+{# templates/example.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Example Page{% endblock %}
+
+{% block content %}
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+        import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging.js';
+
+        // Your Firebase configuration from Twig
+        const firebaseConfig = {{ jsonData|raw }};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        // Request permission to show notifications
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                console.log('Notification permission granted.');
+
+                // Get the FCM token
+                getToken(messaging).then((token) => {
+                    if (token) {
+                        console.log('FCM Token:', token);
+                        // Send the token to your server for registration
+                        fetch('/api/save-token', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ token })
+                        }).then(response => response.json())
+                            .then(data => console.log('Token saved:', data))
+                            .catch(error => console.error('Error saving token:', error));
+                    } else {
+                        console.log('No registration token available. Request permission to generate one.');
+                    }
+                }).catch((error) => {
+                    console.error('Error getting token:', error);
+                });
+            } else {
+                console.log('Notification permission denied.');
+            }
+        }).catch(error => {
+            console.error('Error requesting notification permission:', error);
+        });
+
+        // Listen for foreground messages
+        onMessage(messaging, (payload) => {
+            console.log('Message received. ', payload);
+            const notificationTitle = payload.notification.title;
+            const notificationOptions = {
+                body: payload.notification.body,
+                icon: payload.notification.icon
+            };
+
+            // Display a notification if permission is granted
+            if (Notification.permission === 'granted') {
+                new Notification(notificationTitle, notificationOptions);
+            }
+        });
+    </script>
+
+    <h1>Welcome to the Example Page</h1>
+    <p>This is an example of a page that extends the base template.</p>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- Add additional JavaScript files specific to this page -->
+{% endblock %}
